@@ -1,0 +1,69 @@
+name: CI Teelog (check REACT BUILD)
+on: [push]
+
+jobs:
+  Getting-Started:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+  Job-Installing:
+    runs-on: ubuntu-latest
+    needs: Getting-Started
+    steps:
+      - name: Echoing commit message
+        run: echo ${{ github.event.head_commit.message }} 
+      - name: Check out repository code
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        uses: actions/checkout@v2
+      - name: List files in the repository
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+            ls ${{ github.workspace }}
+      - name: List files in the my-app folder and checking changes.
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          cd ${{ github.workspace }}
+          cd my-app
+          ls
+      - name: clean cache
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          cd ${{ github.workspace }}
+          cd my-app
+          npm cache clean --force
+      - name: install
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          cd ${{ github.workspace }}
+          cd my-app
+          npm ci
+      - name: Running npm build and git add
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+            cd ${{ github.workspace }}
+            cd my-app
+            npm run build
+            git config --global user.email "weslley.nascimento@gmail.com"
+            git config --global user.name "Weslley"
+            git add build
+      - name: Commit the build if sucess to add it.
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          git commit -m "CI Build"
+      - name: Pushing
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          git diff-index --quiet HEAD || git commit -m "CI Build"
+      - name: Pushing
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          git push origin main
+      - name: Finish
+        if: ${{ startsWith(github.event.head_commit.message, 'BUILD') == true }}
+        run: |
+          cd ${{ github.workspace }}
+          cd my-app
+          ls
+          echo "🍏 Forced this job's status is ${{ job.status }}."
